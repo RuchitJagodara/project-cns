@@ -876,6 +876,10 @@ string withdraw(string name, string delta)
     string final_message = "";
     string begin_transaction = "BEGIN TRANSACTION;";
 
+    if (delta=="0.00"){
+        return "Invalid transaction amount!";
+    }
+
     if (executeSQL(begin_transaction, &messageError) != SQLITE_OK)
     {
         final_message = "Begin transaction error: " + string(messageError) + "\n";
@@ -935,6 +939,10 @@ string deposit(string name, string delta)
 
     string begin_transaction = "BEGIN TRANSACTION;";
     string final_message = "";
+
+    if (delta=="0.00"){
+        return "Invalid transaction amount!";
+    }
 
     if (executeSQL(begin_transaction, &messageError) != SQLITE_OK)
     {
