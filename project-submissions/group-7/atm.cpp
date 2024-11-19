@@ -679,6 +679,22 @@ string decryptUsingSYM_KEY(const string &key, const string &iv, const string &ci
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 //                                                                  COMMUNICATION FUNCTIONS
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+#include <ctime>
+
+// Function to get the current timestamp
+string getCurrentTimestamp()
+{
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    ostringstream oss;
+    oss << 1900 + ltm->tm_year << "-"
+        << setw(2) << setfill('0') << 1 + ltm->tm_mon << "-"
+        << setw(2) << setfill('0') << ltm->tm_mday << " "
+        << setw(2) << setfill('0') << ltm->tm_hour << ":"
+        << setw(2) << setfill('0') << ltm->tm_min << ":"
+        << setw(2) << setfill('0') << ltm->tm_sec;
+    return oss.str();
+}
 
 // Function send a message to the bank server
 string sendMessageToServer(const string &message, const string &ip, int port)
@@ -729,8 +745,9 @@ string sendMessageToServer(const string &message, const string &ip, int port)
     send(sockfd, key_iv_message.c_str(), key_iv_message.size(), 0);
     sleep(0.5);
 
-    // Sending the Request to the Bank Server
-    string mess = message;
+    // Adding timestamp to the message
+    string timestamp = getCurrentTimestamp();
+    string mess = message + "\nTimestamp: " + timestamp;
     string encrypted_message = encryptUsingSYM_KEY(SYM_KEY, IV, mess);
     send(sockfd, encrypted_message.c_str(), encrypted_message.size(), 0);
 

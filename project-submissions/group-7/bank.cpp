@@ -304,6 +304,18 @@ string sub(string old, string delta)
                                         UTILITY FUNCTIONS
 */
 
+bool isValidAccountName(const string &account)
+{
+    if (account.length() < 1 || account.length() > 122)
+    {
+        return false;
+    }
+
+    regex validPattern("^[-_.0-9a-z]+$");
+
+    return regex_match(account, validPattern);
+}
+
 bool check_input_for_sql_injection(const string &s)
 {
     for (char c : s)
@@ -876,7 +888,7 @@ string withdraw(string name, string delta)
     string final_message = "";
     string begin_transaction = "BEGIN TRANSACTION;";
 
-    if (delta=="0.00"){
+    if (delta[0] == '0'){
         return "Invalid transaction amount!";
     }
 
@@ -940,7 +952,7 @@ string deposit(string name, string delta)
     string begin_transaction = "BEGIN TRANSACTION;";
     string final_message = "";
 
-    if (delta=="0.00"){
+    if (delta[0]=='0'){
         return "Invalid transaction amount!";
     }
 
@@ -992,15 +1004,12 @@ string deposit(string name, string delta)
 /*
                                         COMMUNICATION FUNCTIONS
 */
-
 void handle_client(int client_socket)
 {
-
     char buffer[BUFFER_SIZE];
     string key, iv;
     while (true)
     {
-
         memset(buffer, 0, BUFFER_SIZE);
         int n = read(client_socket, buffer, BUFFER_SIZE - 1);
 
@@ -1044,9 +1053,10 @@ void handle_client(int client_socket)
         string name = request["account"];
         string password = request.contains("password") ? request["password"] : "";
         string mode = request["mode"];
+        string timestamp = request["timestamp"];
 
         // validate account and password
-        if (!check_input_for_sql_injection(name))
+        if (!isValidAccountName(name))
         {
             string response_message = encryptUsingSYM_KEY(key, iv, "Invalid input for Name\n");
             send(client_socket, response_message.c_str(), response_message.length(), 0);
